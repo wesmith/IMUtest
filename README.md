@@ -10,10 +10,12 @@ The IMU class includes the following public methods:
 
 - getGyroType(): Gets the gyro chip type.
 
-- setWeightsAndGyro(): Turns the gyro fusion on or off, and sets the gyro/accelerometer fusion ratio 'alpha'. Note that
-                       two separate IMU classes can be instantiated simultaneously, to directly compare the
-		       accelerometer fused with the gyro to accelerometer-only results, for roll, pitch, heading
-		       angles. This is demonstrated in IMUtest.ino.  
+- setWeightsAndGyro(): Turns the gyro fusion on or off, and sets the gyro/accelerometer fusion ratio 'alpha'. The
+                       alpha parameter is a float from 0.0 to 1.0: alpha ~ 1 weights the gyro heavily, and alpha ~ 0
+		       weights the accelerometer heavily. Note that two separate IMU classes can be instantiated
+		       simultaneously, to directly compare the gyro-accelerometer fusion results with the
+		       accelerometer-only results, for the roll, pitch, and heading angles. This is demonstrated
+		       in IMUtest.ino.  
 
 - doCalibrateAcc(): Accelerometer calibration data (max, min x, y, z values, offsets, scale factors) are printed to
                     the screen via the Arduino serial connection as the user manipulates the IMU carrier in three-space;

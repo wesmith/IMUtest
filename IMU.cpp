@@ -219,32 +219,14 @@ void IMU::getHeading(void)
 {
   LSM303::vector<float> E; // east
   LSM303::vector<float> N; // north
-  // debug: try mag_norm instead of est_mag here: didn't help
+
   vector_cross(&est_mag, &est_acc, &E); // east = mag vector x gravity (up)
 
-  vector_normalize(&E);  // turned off in debug
-
-  //Serial.print("  mag_norm.x  "); Serial.print(mag_norm.x);  // debug
-  //Serial.print("  mag_norm.y  "); Serial.print(mag_norm.y);  // debug
-  //Serial.print("  mag_norm.z  "); Serial.println(mag_norm.z);  // debug
-  //Serial.print("  est_acc.x  "); Serial.print(est_acc.x);  // debug
-  //Serial.print("  est_acc.y  "); Serial.print(est_acc.y);  // debug
-  //Serial.print("  est_acc.z  "); Serial.println(est_acc.z);  // debug
-  //Serial.print("  E.x  "); Serial.print(E.x);  // debug
-  //Serial.print("  E.y  "); Serial.print(E.y);  // debug
-  //Serial.print("  E.z  "); Serial.println(E.z);  // debug
+  vector_normalize(&E); 
   
   vector_cross(&est_acc, &E, &N);        // north = gravity (up) x east
   vector_normalize(&N);
   
-  //Serial.print("  N.x  "); Serial.print(N.x);  // debug
-  //Serial.print("  N.y  "); Serial.print(N.y);  // debug
-  //Serial.print("  N.z  "); Serial.println(N.z);  // debug
-
-  //Serial.print("  rollAxis.x  "); Serial.print(rollAxis.x);  // debug
-  //Serial.print("  rollAxis.y  "); Serial.print(rollAxis.y);  // debug
-  //Serial.print("  rollAxis.z  "); Serial.println(rollAxis.z);  // debug
-   
   // compute heading: using '-' sign to get z-axis convention consistent with x- and
   // y-axis conventions: i.e., looking along z-axis towards increasing z (consider
   // the observer is under the x-y plane, looking up) the CW direction is positive;
@@ -252,8 +234,6 @@ void IMU::getHeading(void)
   // north-to-west, which may be counter-intuitive
   head = -atan2(vector_dot(&E, &rollAxis),
 		vector_dot(&N, &rollAxis)) * RAD2DEG;
-
-  //Serial.print("heading  "); Serial.println(head); // debug  
 }
 
 

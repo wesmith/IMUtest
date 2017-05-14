@@ -16,7 +16,8 @@ int  msecPerCycle = 50;
 long baud = 115200; // 115200; // 9600, 57600, 115200
 
 // generally have only one of the following set to TRUE, depending upon task
-bool PRINTSCREEN  = true;  // user-friendly print of roll, pitch, heading
+bool PRINTSCREEN  = true;   // compare gyro fusion 'on' to gyro fusion 'off', 
+                            // user-friendly print of roll, pitch, heading
 bool RPH          = false;  // roll, pitch, heading, formatted for visual python
 bool RPH2         = false;  // compare gyro fusion 'on' to gyro fusion 'off', 
                             // for Processing RealTimePlotter format
@@ -96,17 +97,17 @@ void setup() {
   
   // true means gyro is used, followed by alpha 
   // 0 < alpha < 1; 
-  // alpha ~ 1 weights gyro heavily, alpha ~ 0 mall weights accelerometer heavily
+  // alpha ~ 1 weights gyro heavily, alpha ~ 0 weights accelerometer heavily
   // if false, alpha is ignored, and no gyro data is used
   withGyro.setWeightsAndGyro(true, 0.95); 
   noGyro.setWeightsAndGyro(false, 0.95); // no gyro, alpha is ignored
   
-  // mag, acc, calibration method to be updated: take three offsets, three scales
-  // 5/11/17 calib, average of three 
+  // mag, acc, calibration methods take three offsets, three scales
+  // 5/11/17 calibration, average of three 
   withGyro.setCalibrateMag(  -52, -158,   39,  1.00, 1.02, 1.16); 
   noGyro.setCalibrateMag(  -52, -158,   39,  1.00, 1.02, 1.16); 
   
-  // 5/8/17 values
+  // 5/8/17 calibration values
   withGyro.setCalibrateAcc(-1020,  -84, -700,  1.07, 1.07, 1.00); 
   noGyro.setCalibrateAcc(-1020,  -84, -700,  1.07, 1.07, 1.00); 
   

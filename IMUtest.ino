@@ -13,7 +13,7 @@ Please see the MIT License in the project root directory for specifics.
 
 // speed settings
 int  msecPerCycle = 50; 
-long baud = 115200; // 115200; // 9600, 57600, 115200
+long baud = 115200; // typically 9600, 57600, 115200
 
 // generally have only one of the following set to TRUE, depending upon task
 bool PRINTSCREEN  = true;   // compare gyro fusion 'on' to gyro fusion 'off', 

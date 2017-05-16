@@ -88,7 +88,12 @@ void printResults() {
 
 void setup() {
   Serial.begin(baud); // for displayWSHeading.py
-  Wire.begin();
+  //Wire.begin();  // arduino as master
+  
+  // arduino slave address 0x44; this doesn't conflict with LSM303 or L3G addresses
+  Wire.begin(0x44); 
+  // I2C clock frequency; don't set this register on DUE: there are issues
+  TWBR=100000L; 
   
   withGyro.init();
   noGyro.init();

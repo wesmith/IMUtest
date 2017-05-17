@@ -47,8 +47,9 @@ int main() {
       }
     }
     printf("%4d  ROLL:%+4d PITCH:%+4d HEADING:%+4d\n",
-	   k, data[0]<<8|data[1], data[2]<<8|data[3], data[4]<<8|data[5]);
-    for (jj = 0; jj < 100; jj++) {}  // delay hack
+	   //	   k, data[0]<<8|data[1], data[2]<<8|data[3], data[4]<<8|data[5]);
+	   k, data[0], data[1], data[2]);
+    for (jj = 0; jj < 10000; jj++) {}  // delay hack
   }
   close(file);
   return 0;

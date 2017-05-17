@@ -139,6 +139,12 @@ void printResults() {
 
   if (I2C) {
     fillI2CRegisters();
+    // debug follows: this works
+    char report[120];
+    snprintf(report, sizeof(report),
+    "ROLL:%+4d  data[0]:%+4d  data[1]:%+4d  combined:%+4d", 
+    (int)withGyro.roll, data[0], data[1], data[0]<<8 | data[1]);
+    Serial.println(report);
   }
 
   if (PRINTSCREEN) {

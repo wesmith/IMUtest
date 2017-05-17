@@ -88,7 +88,7 @@ void printResults() {
 
 void setup() {
   Serial.begin(baud);
-  //Wire.begin();  // arduino as master
+  //Wire.begin();  // arduino as I2C master
   
   // arduino I2C slave address: 0x44; no conflict with LSM303 or L3G addresses
   Wire.begin(0x44); 

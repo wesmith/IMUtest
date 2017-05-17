@@ -14,14 +14,15 @@ Please see the MIT License in the project root directory for specifics.
 // arduino I2C slave address: ensure no conflict with LSM303 or L3G addresses
 const byte slaveAdd = 0x44; 
 int registerAddr;
-int data[12];      // I2C data registers 0x00 to 0x0b
+int16_t data[12];      // I2C data registers 0x00 to 0x0b
 
 // speed settings
 int  msecPerCycle = 50; 
 long baud = 115200; // typically 9600, 57600, 115200
 
 // generally have only one of the following set to TRUE, depending upon task
-bool PRINTSCREEN  = true;   // compare gyro fusion 'on' to gyro fusion 'off', 
+bool I2C          = true;   // run in I2C slave mode
+bool PRINTSCREEN  = false;  // compare gyro fusion 'on' to gyro fusion 'off', 
                             // user-friendly print of roll, pitch, heading
 bool RPH          = false;  // roll, pitch, heading, formatted for visual python
 bool RPH2         = false;  // compare gyro fusion 'on' to gyro fusion 'off', 
@@ -94,13 +95,29 @@ void loop() {
   if (CALIBACC) {withGyro.doCalibrateAcc(CALIB_TEST);}
   if (CALIBMAG) {withGyro.doCalibrateMag(CALIB_TEST);}
  
-  if (PRINTSCREEN || RPH  || RPH2 || DEVTYPE) {
+  if (PRINTSCREEN || RPH  || RPH2 || DEVTYPE || I2C) {
     withGyro.getRollPitchHeading();  
     noGyro.getRollPitchHeading();               
     printResults();
   }
   
   delay(msecPerCycle);
+}
+
+
+void fillI2CRegisters() {
+  data[ 0] = (int16_t)withGyro.roll  >>   8;  // MSB
+  data[ 1] = (int16_t)withGyro.roll  & 0xFF;  // LSB
+  data[ 2] = (int16_t)withGyro.pitch >>   8;
+  data[ 3] = (int16_t)withGyro.pitch & 0xFF;
+  data[ 4] = (int16_t)withGyro.head  >>   8;
+  data[ 5] = (int16_t)withGyro.head  & 0xFF; 
+  data[ 6] = (int16_t)noGyro.roll    >>   8;
+  data[ 7] = (int16_t)noGyro.roll    & 0xFF;
+  data[ 8] = (int16_t)noGyro.pitch   >>   8;
+  data[ 9] = (int16_t)noGyro.pitch   & 0xFF;    
+  data[10] = (int16_t)noGyro.head    >>   8;
+  data[11] = (int16_t)noGyro.head    & 0xFF;
 }
 
 
@@ -111,7 +128,7 @@ void receiveRegister(int x) {
 
 void respondData(){
   byte dataValue = 0x00;  // default value
-  if ((registerAddr >= 0x00) && (registerAddr < 0x0b)) {
+  if ((registerAddr >= 0x00) && (registerAddr < 0x0c)) {
     dataValue = data[registerAddr]; 
   }
   Wire.write(dataValue);
@@ -120,8 +137,11 @@ void respondData(){
 
 void printResults() {
 
-  if (PRINTSCREEN) 
-  {
+  if (I2C) {
+    fillI2CRegisters();
+  }
+
+  if (PRINTSCREEN) {
    char report[120];   
    snprintf(report, sizeof(report), 
     "ROLL-NG:%+4d  ROLL:%+4d   PITCH-NG:%+4d  PITCH:%+4d   HEADING-NG:%+4d  HEADING: %+4d", 
@@ -131,8 +151,7 @@ void printResults() {
    Serial.println(report);
   }
   
- if (RPH)
-  {
+ if (RPH) {
     Serial.print("RPH ");
     Serial.print((int)withGyro.roll);
     Serial.print(",");
@@ -144,8 +163,7 @@ void printResults() {
   }
 
  // comparison of gyro fusion and no gyro, format for realtimeplotter
- if (RPH2)  
-  {
+ if (RPH2) {
     //Serial.print("RPH2 ");
     Serial.print((int)noGyro.roll);
     Serial.print(" ");
@@ -163,8 +181,7 @@ void printResults() {
     Serial.println();
   }
 
- if (DEVTYPE) 
- {
+ if (DEVTYPE) {
    Serial.print("Accelerometer & Magnetometer: ");
    Serial.print(withGyro.getMagAccType());
    Serial.print("    Gyro: ");

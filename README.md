@@ -4,8 +4,6 @@ The purpose of this project is to develop a simple utility class to run on Ardui
 pitch, and heading information from a combination of magnetometer/accelerometer and gyro data. A straightforward
 complementary-fusion algorithm to combine the accelerometer and gyro data is implemented.
 
--------------------------------------------
-
 5/19/17 UPDATE
 
 I2C master/slave approach:
@@ -26,7 +24,7 @@ Visual Python:
 Additional python code (that requires the Visual Python library) has been added to facilitate the real-time
 plotting of the IMU roll, pitch, heading. 
 
--------------------------------------------
+END of 5/19/17 update
 
 The IMU class includes the following public methods:
 

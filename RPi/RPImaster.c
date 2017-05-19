@@ -15,7 +15,8 @@ Please see the MIT License in the project root directory for specifics.
 #include<linux/i2c-dev.h>
 
 # define BUFFER_SIZE 12
-const byte slaveAdd = 0x44; 
+const char slaveAdd = 0x44; 
+int i, k, jj; 
 
 int main() {
 
@@ -32,9 +33,9 @@ int main() {
     return 1;
   }
 
-  for (int k = 0; k < N; k++) {
+  for (k = 0; k < N; k++) {
     
-    for (int i = 0; i < BUFFER_SIZE; i++) {
+    for (i = 0; i < BUFFER_SIZE; i++) {
       send = (char) i;
       if(write(file, &send, 1) != 1) {
 	perror("Failed to request a register\n");
@@ -46,7 +47,9 @@ int main() {
       }
     }
     printf("%4d  ROLL:%+4d PITCH:%+4d HEADING:%+4d\n",
-	   k, data[0]<<8|data[1], data[2]<<8|data[3], data[4]<<8|data[5]);
+	   //	   k, data[0]<<8|data[1], data[2]<<8|data[3], data[4]<<8|data[5]);
+	   k, data[0], data[1], data[2]);
+    for (jj = 0; jj < 10000; jj++) {}  // delay hack
   }
   close(file);
   return 0;

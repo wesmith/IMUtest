@@ -4,6 +4,30 @@ The purpose of this project is to develop a simple utility class to run on Ardui
 pitch, and heading information from a combination of magnetometer/accelerometer and gyro data. A straightforward
 complementary-fusion algorithm to combine the accelerometer and gyro data is implemented.
 
+****************************************************
+
+5/19/17 UPDATE
+
+I2C master/slave approach:
+
+An attempt was made to run the Arduino as BOTH an I2C master and I2C slave (from a Raspberry Pi 3 (RPi3) master)
+simultaneously, but initial results were unsuccessful: roll, pitch, heading data processed on the Arduino was not
+successfully transmitted to the RPi3. This may be revisited at some point. The Arduino is flawless as a master I2C
+device in running the three I2C devices on the Pololu carrier: the LSM303 accelerometer and magnetometer, and the
+L3G gyro. However, when the Arduino was configured as an I2C slave to the RPi, in addition to running the three
+carrier devices, there may have been I2C bus issues when coupled with RPi3 I2C protocols. TBD whether it is even
+possible to run the Arduino UNO as both an I2C slave and master simultaneously: a quick web search didn't bring up
+projects involving simultaneous master/slave I2C configurations on the Arduino.
+
+As a result, the I2C slave components of IMUtest.ino will be put in comments for the time being. 
+   
+Visual Python:
+
+Additional python code (that requires the Visual Python library) has been added to facilitate the real-time
+plotting of the IMU roll, pitch, heading. 
+
+****************************************************
+
 The IMU class includes the following public methods:
 
 - getMagAccType(): Gets the magnetometer/accelerometer chip type.

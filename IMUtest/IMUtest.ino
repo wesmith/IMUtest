@@ -24,8 +24,8 @@ long baud = 115200; // typically 9600, 57600, 115200
 bool I2C          = false;   // run in I2C slave mode
 bool PRINTSCREEN  = false;  // compare gyro fusion 'on' to gyro fusion 'off', 
                             // user-friendly print of roll, pitch, heading
-bool RPH          = false;   // roll, pitch, heading, formatted for visual python
-bool VEC          = true;   // vectors and roll, pitch, heading for visual python
+bool RPH          = true;   // roll, pitch, heading, formatted for displayIMU.py
+bool VEC          = false;   // vectors and roll, pitch, heading for visual python
 bool RPH2         = false;  // compare gyro fusion 'on' to gyro fusion 'off', 
                             // for Processing RealTimePlotter format
 bool CALIBACC     = false;  // generate accelerometer calibration data
@@ -164,15 +164,9 @@ void printResults() {
    Serial.println(report);
   }
 
- // comparison of gyro fusion and no gyro, formatted for visual python
+ // display of roll, pitch, heading formatted for displayIMU.py
  if (RPH) {
-    Serial.print("RPH ");
-    Serial.print((int)noGyro.roll);
-    Serial.print(",");
-    Serial.print((int)noGyro.pitch);
-    Serial.print(",");
-    Serial.print((int)noGyro.head);
-    Serial.print(",");    
+    Serial.print("RPH "); 
     Serial.print((int)withGyro.roll);
     Serial.print(",");
     Serial.print((int)withGyro.pitch);

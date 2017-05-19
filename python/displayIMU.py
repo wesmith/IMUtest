@@ -43,6 +43,8 @@ import pdb
 import sys
 import time
 
+import rotation as rt  # local module
+
 
 deg2rad = np.pi / 180.0 
 rad2deg = 180. / np.pi  
@@ -61,7 +63,7 @@ class RPYDisplay():
         self.pitchTail  = cylinder(pos=( 0.0,0,0), axis=(-0.2,0,0),
                                radius=0.01,color=color.green)
         self.yawHead    = arrow(   pos=( 0.6,0,0), axis=( 0.2,0,0),
-                               shaftwidth=0.02, fixedwidth=1, color=color.cyan,)
+                               shaftwidth=0.02, fixedwidth=1, color=color.cyan)
 
         self.R = label(pos=(-0.6, 0.3, 0), text="-", box=0, opacity=0)
         self.P = label(pos=( 0.0, 0.3, 0), text="-", box=0, opacity=0)
@@ -96,67 +98,79 @@ class RPYDisplay():
         self.rollTail.axis   = ( -0.2 * cos(r), -0.2 * sin(r), 0. )
         self.pitchHead.axis  = (  0.2 * cos(p),  0.2 * sin(p), 0. )
         self.pitchTail.axis  = ( -0.2 * cos(p), -0.2 * sin(p), 0. )
-        self.yawHead.axis    = ( -0.2 * sin(y),  0.2 * cos(y), 0. ) # puts N up in plot
+        self.yawHead.axis    = ( -0.2 * sin(y),  0.2 * cos(y), 0. ) # puts N as 'up'
         self.R.text      = 'ROLL %+7d'      % ( r * rad2deg ) 
         self.P.text      = 'PITCH %+7d'     % ( p * rad2deg )
         self.Y.text      = 'HEADING %+7d'   % ( y * rad2deg )
 
 
-class Heading():
-   
-    def __init__( self, mode, txt='' ):
+class VectorDisplay():
 
-        # mode text format defined in IMUtest.ino;
-        # zero arrays are to store last values read if error occurs
-        self.allModes = {'VEC':np.zeros( 12 ),
-                         'RPH':np.zeros(  6 )}
-
-        self.mode     = mode
-
-        # SCENE showing chip acc, mag vectors superposed on fixed IMU X, Y, Z axes
-        scene         = display( title='%s  ACC, MAG Vectors' % txt,
-                                 x=0, y=0, width=400, height=400 )
-        scene.range   = ( 1.5, 1.5, 1.5 )
-        scene.forward = ( 1.0,  1.0,  -1.0 ) # camera look direction 
-        scene.up      = ( 0.0, 0.0, 1.0 )
-        scene.select()
+    def __init__( self, txt1, txt2 ):
+        
         # reference axes
         arrow( color=color.white, axis=(0,0,1), shaftwidth=0.02, fixedwidth=1 )
         arrow( color=color.white, axis=(0,1,0), shaftwidth=0.02, fixedwidth=1 )
         arrow( color=color.white, axis=(1,0,0), shaftwidth=0.02, fixedwidth=1 )
         # labels for reference axes
-        label( pos=(0,0,1.1),   text="CHIP Z-AXIS", box=0, opacity=0, color=color.yellow ) 
-        label( pos=(0,1.2,0),   text="CHIP Y-AXIS", box=0, opacity=0, color=color.yellow )
-        label( pos=(1.2,0,0),   text="CHIP X-axis", box=0, opacity=0, color=color.yellow )
+        label( pos=(0,0,1.1),   text=txt1[0], box=0, opacity=0, color=color.yellow ) 
+        label( pos=(0,1.2,0),   text=txt1[1], box=0, opacity=0, color=color.yellow )
+        label( pos=(1.2,0,0),   text=txt1[2], box=0, opacity=0, color=color.yellow )
 
-        label( pos=(0,-0.8,-0.8),
-               text="RAW ACC: RED\nRAW MAG: GREEN\nEST ACC: MAGENTA\nEST MAG: CYAN",
+        label( pos=(0,-0.5,-0.8),
+               text=txt2,
                box=1, color=color.yellow, font='monospace', opacity=0 )
         # IMUtest arrows
-        self.acc    = arrow( color=color.red,     shaftwidth=0.04, fixedwidth=1 )
-        self.mag    = arrow( color=color.green,   shaftwidth=0.04, fixedwidth=1 )
-        self.estAcc = arrow( color=color.magenta, shaftwidth=0.04, fixedwidth=1 )
-        self.estMag = arrow( color=color.cyan,    shaftwidth=0.04, fixedwidth=1 )
+        self.A    = arrow( color=color.red,     shaftwidth=0.04, fixedwidth=1 )
+        self.B    = arrow( color=color.green,   shaftwidth=0.04, fixedwidth=1 )
+        self.C    = arrow( color=color.magenta, shaftwidth=0.04, fixedwidth=1 )
 
+    def __call__( self, rotMat ):
+
+        self.A.axis = rotMat[0,:]
+        self.B.axis = rotMat[1,:]
+        self.C.axis = rotMat[2,:]                
+ 
+
+class DisplayController():
+   
+    def __init__( self, mode, txt='' ):
+
+        # mode text format defined in IMUtest.ino;
+        self.allModes = {'QUAT':np.zeros( 4 ),
+                         'RPH' :np.zeros( 3 )}
+
+        self.mode     = mode
+
+        # SCENE showing chip axes superposed on fixed North, West, UP
+        scene         = display( title='%s  CHIP ORIENTATION' % txt,
+                                 x=0, y=0, width=400, height=400 )
+        scene.range   = ( 1.5, 1.5, 1.5 )
+        scene.forward = ( 1.0,  1.0,  -1.0 ) # camera look direction 
+        scene.up      = ( 0.0, 0.0, 1.0 )
+        scene.select()
+        self.s0 = VectorDisplay(["UP", "MAG WEST", "MAG NORTH"],
+                                "CHIP X-axis: RED\nCHIP Y-axis: GREEN\nCHIP Z-axis: MAGENTA")
         
-        # SCENE showing Euler angles from raw accelerometer
-        scene2        = display( title='EULER ANGLES: RAW ACCELEROMETER',
-                                 x=0, y=400, width=400, height=200 )
-        scene2.range   = ( 1, 1, 1 )
-        scene2.forward = ( 0.0,  0.0,  -1.0 ) # camera look direction 
-        scene2.up      = ( 0.0, 1.0, 0.0 )
-        scene2.select()
+       # SCENE showing North, West, UP axes superposed on fixed chip axes
+        scene         = display( title='%s  WNU ORIENTATION' % txt,
+                                 x=0, y=400, width=400, height=400 )
+        scene.range   = ( 1.5, 1.5, 1.5 )
+        scene.forward = ( 1.0,  1.0,  -1.0 ) # camera look direction 
+        scene.up      = ( 0.0, 0.0, 1.0 )
+        scene.select()
+        self.s1 = VectorDisplay(["CHIP Z-axis", "CHIP Y-axis", "CHIP X-axis"],
+                                "MAG NORTH: RED\nMAG WEST : GREEN\nUP       : MAGENTA")
+
+        # SCENE showing Euler angles
+        scene         = display( title='EULER ANGLES',
+                                 x=400, y=0, width=400, height=200 )
+        scene.range   = ( 1, 1, 1 )
+        scene.forward = ( 0.0,  0.0,  -1.0 ) # camera look direction 
+        scene.up      = ( 0.0, 1.0, 0.0 )
+        scene.select()
         self.s2 = RPYDisplay()
 
-        # SCENE showing Euler angles from gyro/accel fusion
-        scene3        = display( title='EULER ANGLES: GYRO/ACCEL FUSION',
-                                 x=0, y=600, width=400, height=200 )
-        scene3.range   = ( 1, 1, 1 )
-        scene3.forward = ( 0.0,  0.0,  -1.0 ) # camera look direction 
-        scene3.up      = ( 0.0, 1.0, 0.0 )
-        scene3.select()
-        self.s3 = RPYDisplay()
- 
 
     def __call__( self, line ):
         '''
@@ -173,7 +187,7 @@ class Heading():
             
             # print line  # debug
             
-            words = string.split(line,",")   # words will have \r\n at end, so compare to n-1
+            words = string.split(line,",") # words will have \r\n at end, compare to n-1
             words = words[:-1] # remove \r\n at the end
 
             # print words # debug
@@ -188,42 +202,43 @@ class Heading():
                     print words
                     vals = self.allModes[txt]
 
-            # self.allModes[txt] = vals  # explicitly set lastVals
+            if (txt == 'QUAT'):
+                q0 = vals[0]
+                q1 = vals[1]
+                q2 = vals[2]
+                q3 = vals[3]
 
-            # print vals  # WS 4/27/17 debug
-            if (txt == 'VEC'):
-                self.acc.axis = vals[0:3] # raw acceleration vector
-                self.mag.axis = vals[3:6] # raw magnetometer vector
-                self.estAcc.axis = vals[6:9] # gyro/accel fused vector
-
-                r = vals[9]  * deg2rad
-                p = vals[10] * deg2rad
-                h = vals[11] * deg2rad
-                self.s2( r, p, h )
+                rotMat = rt.getRotFromQuat([q0, q1, q2, q3])
+                self.s0( rotMat )
+                self.s1( np.transpose( rotMat ) )
+ 
+                ee = rt.getEulerFromRot(rotMat)  # angles in radians
+                self.s2( ee[0], ee[1], ee[2])
 
             if (txt == 'RPH'):
                 r = vals[0] * deg2rad
                 p = vals[1] * deg2rad
                 h = vals[2] * deg2rad
                 self.s2( r, p, h )
-                r = vals[3] * deg2rad
-                p = vals[4] * deg2rad
-                h = vals[5] * deg2rad
-                self.s3( r, p, h )
                 
-        
-def run( ser, f, rateVal=100 ):
+                rotMat = rt.getRotFromEuler([r, p, h])
+                self.s0( rotMat )
+                self.s1( np.transpose( rotMat ) )
+
+         
+def run( ser, displayObj, rateVal=100 ):
     '''
-    ser = serial-port object
-    f = IMU object to run vpython graphics
-    rateVal = rate at which to run loop (Hz)
+    ser        = serial-port object
+    displayObj = IMU object to run vpython graphics
+    rateVal    = rate at which to run loop (Hz)
     '''
 
     while 1:
 
         rate( rateVal ) # critical for VPython 6 to get rate()
         
-        # ensure serial port is closed properly when Arduino is disconnected
+        # ensure serial port is closed properly if Arduino is disconnected
+        # before this program ends
         try: 
             line = ser.readline()
         except:
@@ -235,24 +250,24 @@ def run( ser, f, rateVal=100 ):
 
         ser.flushInput()  # flush input buffer
         
-        f( line )
+        displayObj( line )
 
 
 def displayIMU( mode, port, baudrate=115200, rateVal=200 ):
 
     ser = serial.Serial( port=port, baudrate=baudrate, timeout=1)
 
-    txt  = 'displayIMUtest.py mode:%s' % mode
-    f = Heading( mode, txt=txt ) # instantiate display class
+    txt  = 'displayIMU.py mode:%s' % mode
+    displayObj = DisplayController( mode, txt=txt ) # instantiate display class
     
-    run( ser, f, rateVal=rateVal )
+    run( ser, displayObj, rateVal=rateVal )
     
 
 if __name__ == '__main__':
 
     # mode is defined in IMUtest.ino for a particular run: it must match the following:
-    mode = 'VEC'
-    #mode = 'RPH'
+    #mode = 'VEC'
+    mode = 'RPH'
 
     port = '/dev/tty.usbmodemfd1341'  # Arduino serial port: the user must specify 
 
@@ -261,9 +276,8 @@ if __name__ == '__main__':
     baudrate = 115200
     
     # refresh rate per second for main loop;
-    # 200 works for 50 Hz setting in IMUtest.ino
-    # 100 works for 20 Hz setting in IMUtest.ino, 50 is too slow
-    rateVal  = 200 
+    # 100 works for 50 Hz setting in IMUtest.ino, seems better than 200; 50 is too slow
+    rateVal  = 100 
 
     displayIMU( mode, port, baudrate=baudrate, rateVal=rateVal  )
 

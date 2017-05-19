@@ -233,7 +233,7 @@ void IMU::getHeading(void)
   // WARNING: with this convention, if z is up, positive heading will be
   // north-to-west, which may be counter-intuitive
   head = -atan2(vector_dot(&E, &rollAxis),
-		vector_dot(&N, &rollAxis)) * RAD2DEG;
+		vector_dot(&N, &rollAxis));
 }
 
 
@@ -254,23 +254,25 @@ void IMU::getRollPitch(void)
   // perpendicular to gravity (i.e., when rollAxis is in the horizontal plane);
   // the minus sign is for the positive CW convention for the pitch angle, looking
   // along the pitch axis; the fused gyro/accel vector is used
-  pitch = -asin( vector_dot( &est_acc, &rollAxis )) * RAD2DEG;
+  pitch = -asin( vector_dot( &est_acc, &rollAxis ));
   
   // roll: is preserved as pitch changes, by normalizing the 'horizontal' vector
   LSM303::vector<float> horizontal; // vector in the horiz plane, perp to rollAxis
   vector_cross(&est_acc, &rollAxis, &horizontal);
   vector_normalize( &horizontal ); // potential problem when pitch is at poles
-  roll = acos( vector_dot( &horizontal, &rollReference )) * RAD2DEG;
+  roll = acos( vector_dot( &horizontal, &rollReference ));
   // get the sign of the roll angle
   roll = vector_dot( &est_acc, &rollReference ) >= 0 ? roll: -roll; 
 }
 
 
-void IMU::getRollPitchHeading(void)
+void IMU::getRollPitchHeadingQuat(void)
 {
-  getEstAcc();  // this calls read(), necessary before heading and roll, pitch
+  getEstAcc();  // this calls read(), necessary before getting heading, roll, pitch
   getHeading();
   getRollPitch();
+  getQuatFromEuler();
+  roll *= RAD2DEG; pitch *= RAD2DEG; head *= RAD2DEG;  // after calculations, convert
 }
 
 
@@ -330,18 +332,6 @@ void IMU::getRawAccMagGyro() // for calibration
   gyr_raw = {gyro.g.x, gyro.g.y, gyro.g.z};
 }
 
-
-// IMPORTANT: use this vector_normalize instead of
-// LSM303::vector_normalize: the latter doesn't test for
-// divide by zero
-void IMU::vector_normalize(LSM303::vector<float> *a)
-{
-  double mag = sqrt(vector_dot(a, a));
-  if (mag >= EPS)
-    { a->x /= mag;  a->y /= mag;  a->z /= mag; }
-  else
-    { a->x = a->y = a->z = 0.; }
-}
 
 // stand-alone function to print magnetic-calibration info
 void IMU::doCalibrateMag(bool TEST)  
@@ -429,6 +419,36 @@ void IMU::printCalibrate()
   Serial.print(dtostrf(scaleY, 9, 4, report)); 
   Serial.print(dtostrf(scaleZ, 9, 4, report)); 
   Serial.println();
+}
+
+
+void IMU::getQuatFromEuler()
+{
+  double r2 = roll/2;
+  double p2 = pitch/2;
+  double h2 = head/2;
+  
+  double cr = cos(r2); double sr = sin(r2);
+  double cp = cos(p2); double sp = sin(p2);
+  double ch = cos(h2); double sh = sin(h2);
+
+  q0 = cr * cp * ch + sr * sp * sh;
+  q1 = sr * cp * ch - cr * sp * sh;
+  q2 = cr * sp * ch + sr * cp * sh;
+  q3 = cr * cp * sh - sr * sp * ch;
+}
+
+
+// IMPORTANT: use this vector_normalize instead of
+// LSM303::vector_normalize: the latter doesn't test for
+// divide by zero
+void IMU::vector_normalize(LSM303::vector<float> *a)
+{
+  double mag = sqrt(vector_dot(a, a));
+  if (mag >= EPS)
+    { a->x /= mag;  a->y /= mag;  a->z /= mag; }
+  else
+    { a->x = a->y = a->z = 0.; }
 }
 
 

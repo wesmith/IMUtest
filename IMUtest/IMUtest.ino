@@ -24,8 +24,8 @@ long baud = 115200; // typically 9600, 57600, 115200
 bool I2C          = false;   // run in I2C slave mode
 bool PRINTSCREEN  = false;  // compare gyro fusion 'on' to gyro fusion 'off', 
                             // user-friendly print of roll, pitch, heading
-bool RPH          = true;   // roll, pitch, heading, formatted for displayIMU.py
-bool VEC          = false;   // vectors and roll, pitch, heading for visual python
+bool RPH          = false;   // roll, pitch, heading, formatted for displayIMU.py
+bool QUAT         = true;   // return quaternion formatted for displayIMU.py
 bool RPH2         = false;  // compare gyro fusion 'on' to gyro fusion 'off', 
                             // for Processing RealTimePlotter format
 bool CALIBACC     = false;  // generate accelerometer calibration data
@@ -99,9 +99,9 @@ void loop() {
   if (CALIBACC) {withGyro.doCalibrateAcc(CALIB_TEST);}
   if (CALIBMAG) {withGyro.doCalibrateMag(CALIB_TEST);}
  
-  if (PRINTSCREEN || RPH  || RPH2 || DEVTYPE || I2C || VEC) {
-    withGyro.getRollPitchHeading();  
-    noGyro.getRollPitchHeading();               
+  if (PRINTSCREEN || RPH  || RPH2 || DEVTYPE || I2C || QUAT) {
+    withGyro.getRollPitchHeadingQuat();  
+    noGyro.getRollPitchHeadingQuat();               
     printResults();
   }
   
@@ -176,31 +176,15 @@ void printResults() {
     Serial.println();
   }
 
- if (VEC) {
-    Serial.print("VEC");
-    Serial.print(noGyro.acc_norm.x);
+ if (QUAT) {
+    Serial.print("QUAT");
+    Serial.print(withGyro.q0);
     Serial.print(",");
-    Serial.print(noGyro.acc_norm.y);
+    Serial.print(withGyro.q1);
     Serial.print(",");
-    Serial.print(noGyro.acc_norm.z);
-    Serial.print(",");
-    Serial.print(noGyro.mag_norm.x);
-    Serial.print(",");
-    Serial.print(noGyro.mag_norm.y);
-    Serial.print(",");
-    Serial.print(noGyro.mag_norm.z);
-    Serial.print(",");
-    Serial.print(withGyro.acc_norm.x);
-    Serial.print(",");
-    Serial.print(withGyro.acc_norm.y);
-    Serial.print(",");
-    Serial.print(withGyro.acc_norm.z);
-    Serial.print(","); 
-    Serial.print(withGyro.roll);
-    Serial.print(",");
-    Serial.print(withGyro.pitch);
-    Serial.print(",");
-    Serial.print(withGyro.head);
+    Serial.print(withGyro.q2);
+    Serial.print(",");    
+    Serial.print(withGyro.q3);
     Serial.print(",");    
     Serial.println();
  }

@@ -47,7 +47,7 @@ class IMU
 
   void setIMUAxes(float x1, float y1, float z1, float x2, float y2, float z2);
 
-  void getRollPitchHeading(void);
+  void getRollPitchHeadingQuat(void); 
 
   void getRawAccMagGyro(void);
 
@@ -59,6 +59,7 @@ class IMU
   ////////////////////////////
 
   float roll, pitch, head;
+  double q0, q1, q2, q3;   // quaternion
 
   LSM303::vector<int16_t> acc_raw;
   LSM303::vector<int16_t> mag_raw;
@@ -85,6 +86,8 @@ class IMU
   void getEstAcc(void);
 
   void printCalibrate(void);
+
+  void getQuatFromEuler(void);
 
   void vector_normalize(LSM303::vector<float> *a);
 

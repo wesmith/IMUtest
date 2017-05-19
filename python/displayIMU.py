@@ -266,8 +266,8 @@ def displayIMU( mode, port, baudrate=115200, rateVal=200 ):
 if __name__ == '__main__':
 
     # mode is defined in IMUtest.ino for a particular run: it must match the following:
-    #mode = 'VEC'
-    mode = 'RPH'
+    mode = 'QUAT'
+    #mode = 'RPH'
 
     port = '/dev/tty.usbmodemfd1341'  # Arduino serial port: the user must specify 
 

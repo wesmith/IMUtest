@@ -12,19 +12,20 @@ Please see the MIT License in the project root directory for specifics.
 #include "IMU.h" 
 
 // arduino I2C slave address: ensure no conflict with LSM303 or L3G addresses
-const byte slaveAdd = 0x44; 
+//const byte slaveAdd = 0x44; 
 int registerAddr;
 int16_t data[12];      // I2C data registers 0x00 to 0x0b
 
 // speed settings
-int  msecPerCycle = 50; 
+int  msecPerCycle = 20; // 50 Hz
 long baud = 115200; // typically 9600, 57600, 115200
 
 // generally have only one of the following set to TRUE, depending upon task
-bool I2C          = true;   // run in I2C slave mode
+bool I2C          = false;   // run in I2C slave mode
 bool PRINTSCREEN  = false;  // compare gyro fusion 'on' to gyro fusion 'off', 
                             // user-friendly print of roll, pitch, heading
-bool RPH          = false;  // roll, pitch, heading, formatted for visual python
+bool RPH          = false;   // roll, pitch, heading, formatted for visual python
+bool VEC          = true;   // vectors and roll, pitch, heading for visual python
 bool RPH2         = false;  // compare gyro fusion 'on' to gyro fusion 'off', 
                             // for Processing RealTimePlotter format
 bool CALIBACC     = false;  // generate accelerometer calibration data
@@ -40,12 +41,15 @@ IMU noGyro;    // just accelerometer
 void setup() {
 
   Serial.begin(baud);
-  
-  Wire.begin(slaveAdd);
-  Wire.onReceive(receiveRegister);
-  Wire.onRequest(respondData);
+
+  Wire.begin();
+
+  // the following code when Arduino is I2C slave
+  //Wire.begin(slaveAdd);  
+  //Wire.onReceive(receiveRegister);
+  //Wire.onRequest(respondData);
   // I2C clock freq; don't set this register on DUE: there are currently issues
-  TWBR=100000L; 
+  //TWBR=100000L; 
   
   withGyro.init();
   noGyro.init();
@@ -95,7 +99,7 @@ void loop() {
   if (CALIBACC) {withGyro.doCalibrateAcc(CALIB_TEST);}
   if (CALIBMAG) {withGyro.doCalibrateMag(CALIB_TEST);}
  
-  if (PRINTSCREEN || RPH  || RPH2 || DEVTYPE || I2C) {
+  if (PRINTSCREEN || RPH  || RPH2 || DEVTYPE || I2C || VEC) {
     withGyro.getRollPitchHeading();  
     noGyro.getRollPitchHeading();               
     printResults();
@@ -125,15 +129,18 @@ void receiveRegister(int x) {
   registerAddr = Wire.read();
 }
 
-
+void respondData(){  // debug
+  Wire.write(registerAddr);  
+}
+/*
 void respondData(){
-  byte dataValue = 0x00;  // default value
+  char dataValue = 0x01;  // default value, debug value 5
   if ((registerAddr >= 0x00) && (registerAddr < 0x0c)) {
     dataValue = data[registerAddr]; 
   }
   Wire.write(dataValue);
 }
-
+*/
 
 void printResults() {
 
@@ -156,9 +163,16 @@ void printResults() {
     (int)noGyro.head,  (int)withGyro.head);
    Serial.println(report);
   }
-  
+
+ // comparison of gyro fusion and no gyro, formatted for visual python
  if (RPH) {
     Serial.print("RPH ");
+    Serial.print((int)noGyro.roll);
+    Serial.print(",");
+    Serial.print((int)noGyro.pitch);
+    Serial.print(",");
+    Serial.print((int)noGyro.head);
+    Serial.print(",");    
     Serial.print((int)withGyro.roll);
     Serial.print(",");
     Serial.print((int)withGyro.pitch);
@@ -167,6 +181,35 @@ void printResults() {
     Serial.print(",");    
     Serial.println();
   }
+
+ if (VEC) {
+    Serial.print("VEC");
+    Serial.print(noGyro.acc_norm.x);
+    Serial.print(",");
+    Serial.print(noGyro.acc_norm.y);
+    Serial.print(",");
+    Serial.print(noGyro.acc_norm.z);
+    Serial.print(",");
+    Serial.print(noGyro.mag_norm.x);
+    Serial.print(",");
+    Serial.print(noGyro.mag_norm.y);
+    Serial.print(",");
+    Serial.print(noGyro.mag_norm.z);
+    Serial.print(",");
+    Serial.print(withGyro.acc_norm.x);
+    Serial.print(",");
+    Serial.print(withGyro.acc_norm.y);
+    Serial.print(",");
+    Serial.print(withGyro.acc_norm.z);
+    Serial.print(","); 
+    Serial.print(withGyro.roll);
+    Serial.print(",");
+    Serial.print(withGyro.pitch);
+    Serial.print(",");
+    Serial.print(withGyro.head);
+    Serial.print(",");    
+    Serial.println();
+ }
 
  // comparison of gyro fusion and no gyro, format for realtimeplotter
  if (RPH2) {

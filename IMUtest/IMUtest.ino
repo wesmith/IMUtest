@@ -60,8 +60,8 @@ void setup() {
   // 0 < alpha < 1; 
   // alpha ~ 1 weights gyro heavily, alpha ~ 0 weights accelerometer heavily
   // if false, alpha is ignored, and no gyro data is used
-  withGyro.setWeightsAndGyro(true, 0.95); 
-  noGyro.setWeightsAndGyro(false, 0.95); // no gyro, alpha is ignored
+  withGyro.setWeightsAndGyro(true, 0.95, 0.5); // accelerometer alpha, magnetometer alpha
+  noGyro.setWeightsAndGyro(false, 0.0, 0.0); // no gyro, accelerometer alpha is ignored
   
   // mag, acc, calibration methods take three offsets, three scales
   // 5/11/17 calibration, average of three 

@@ -83,12 +83,26 @@ def plotIMU( port, baudrate=115200, N=1000):
     
     fig = py.figure( figsize = (12,8) )
 
-    ax = fig.add_subplot( nr, nc, 1 )
-    
-    ax.plot( vals )
+    label = 'NO GYRO, WITH GYRO'
 
+    ax = fig.add_subplot( nr, nc, 1 )
+    ax.plot( vals[:,0], label='NO GYRO' )
+    ax.plot( vals[:,1], label='WITH GYRO' )
+    ax.legend( loc=4, prop={'size':10})
     py.grid()
     
+    ax = fig.add_subplot( nr, nc, 2 )
+    ax.plot( vals[:,2], label='NO GYRO' )
+    ax.plot( vals[:,3], label='WITH GYRO' )
+    ax.legend( loc=4, prop={'size':10})
+    py.grid()
+    
+    ax = fig.add_subplot( nr, nc, 3 )
+    ax.plot( vals[:,4], label='NO GYRO or MAG SMOOTHING' )
+    ax.plot( vals[:,5], label='WITH GYRO and MAG SMOOTHING' )
+    ax.legend( loc=4, prop={'size':10})
+    py.grid()
+
     py.show()
     
 
@@ -100,6 +114,6 @@ if __name__ == '__main__':
     # NOTE: the same baudrate must be defined in IMUtest.ino
     baudrate = 57600 #9600 #115200
 
-    N = 1000  # the number of time samples to plot
+    N = 300  # the number of time samples to plot
     
     plotIMU( port, baudrate=baudrate, N=N )

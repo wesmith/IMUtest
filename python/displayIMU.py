@@ -47,7 +47,10 @@ import rotation as rt  # local module
 
 
 deg2rad = np.pi / 180.0 
-rad2deg = 180. / np.pi  
+rad2deg = 180. / np.pi
+
+# indicator for text stream: use in IMUtest.ino Serial.print statements
+mark = "tt"  
 
 
 class RPYDisplay():
@@ -134,13 +137,11 @@ class VectorDisplay():
 
 class DisplayController():
    
-    def __init__( self, mode, txt='' ):
+    def __init__( self, txt='' ):
 
         # mode text format defined in IMUtest.ino;
         self.allModes = {'QUAT':np.zeros( 4 ),
                          'RPH' :np.zeros( 3 )}
-
-        self.mode     = mode
 
         # SCENE showing chip axes superposed on fixed North, West, UP
         scene         = display( title='%s  CHIP ORIENTATION' % txt,
@@ -178,19 +179,19 @@ class DisplayController():
         First verify that baud rates are identical in this implementation 
         and in IMUtest.ino. 
         '''
-        txt = self.mode
-        num = len( self.allModes[txt] )
         
-        if line.find( txt ) != -1: # check for lines starting with text leader
+        if line.find( mark ) != -1: # check for lines starting with text leader
 
-            line = line.replace( txt, "" )   # delete text leader
-            
-            # print line  # debug
-            
+            line = line.replace( mark, "" )   # delete text leader
+
             words = string.split(line,",") # words will have \r\n at end, compare to n-1
             words = words[:-1] # remove \r\n at the end
 
-            # print words # debug
+            txt = words[1] # get data mode
+
+            num = len( self.allModes[txt] )
+
+            words = words[2:] # strip off mode
 
             vals = np.zeros( num ) # initialize, in case next test not passed
 
@@ -200,8 +201,7 @@ class DisplayController():
                 except:
                     print "Invalid line"
                     print words
-                    vals = self.allModes[txt]
-
+ 
             if (txt == 'QUAT'):
                 q0 = vals[0]
                 q1 = vals[1]
@@ -211,7 +211,7 @@ class DisplayController():
                 rotMat = rt.getRotFromQuat([q0, q1, q2, q3])
                 self.s0( rotMat )
                 self.s1( np.transpose( rotMat ) )
- 
+
                 ee = rt.getEulerFromRot(rotMat)  # angles in radians
                 self.s2( ee[0], ee[1], ee[2])
 
@@ -220,7 +220,7 @@ class DisplayController():
                 p = vals[1] * deg2rad
                 h = vals[2] * deg2rad
                 self.s2( r, p, h )
-                
+
                 rotMat = rt.getRotFromEuler([r, p, h])
                 self.s0( rotMat )
                 self.s1( np.transpose( rotMat ) )
@@ -253,21 +253,17 @@ def run( ser, displayObj, rateVal=100 ):
         displayObj( line )
 
 
-def displayIMU( mode, port, baudrate=115200, rateVal=200 ):
+def displayIMU( port, baudrate=115200, rateVal=200 ):
 
     ser = serial.Serial( port=port, baudrate=baudrate, timeout=1)
 
-    txt  = 'displayIMU.py mode:%s' % mode
-    displayObj = DisplayController( mode, txt=txt ) # instantiate display class
+    txt  = 'displayIMU.py '
+    displayObj = DisplayController( txt=txt ) # instantiate display class
     
     run( ser, displayObj, rateVal=rateVal )
     
 
 if __name__ == '__main__':
-
-    # mode is defined in IMUtest.ino for a particular run: it must match the following:
-    mode = 'QUAT'
-    #mode = 'RPH'
 
     port = '/dev/tty.usbmodemfd1341'  # Arduino serial port: the user must specify 
 
@@ -279,6 +275,6 @@ if __name__ == '__main__':
     # 100 works for 50 Hz setting in IMUtest.ino, seems better than 200; 50 is too slow
     rateVal  = 100 
 
-    displayIMU( mode, port, baudrate=baudrate, rateVal=rateVal  )
+    displayIMU( port, baudrate=baudrate, rateVal=rateVal  )
 
     

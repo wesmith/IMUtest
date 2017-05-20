@@ -18,16 +18,16 @@ int16_t data[12];      // I2C data registers 0x00 to 0x0b
 
 // speed settings
 int  msecPerCycle = 20; // 50 Hz
-long baud = 115200; // typically 9600, 57600, 115200
+long baud = 57600; //9600; //115200; // typically 9600, 57600, 115200
 
 // generally have only one of the following set to TRUE, depending upon task
 bool I2C          = false;   // run in I2C slave mode
 bool PRINTSCREEN  = false;  // compare gyro fusion 'on' to gyro fusion 'off', 
                             // user-friendly print of roll, pitch, heading
 bool RPH          = false;   // roll, pitch, heading, formatted for displayIMU.py
-bool QUAT         = true;   // return quaternion formatted for displayIMU.py
-bool RPH2         = false;  // compare gyro fusion 'on' to gyro fusion 'off', 
-                            // for Processing RealTimePlotter format
+bool QUAT         = false;   // quaternion formatted for displayIMU.py
+bool P6           = true;   // compare gyro fusion 'on' to gyro fusion 'off',
+                            // for plotIMU.py
 bool CALIBACC     = false;  // generate accelerometer calibration data
 bool CALIBMAG     = false;  // generate magnetometer  calibration data
 bool CALIB_TEST   = false;  // test robustness of calibration, once platform calibrated: 
@@ -99,7 +99,7 @@ void loop() {
   if (CALIBACC) {withGyro.doCalibrateAcc(CALIB_TEST);}
   if (CALIBMAG) {withGyro.doCalibrateMag(CALIB_TEST);}
  
-  if (PRINTSCREEN || RPH  || RPH2 || DEVTYPE || I2C || QUAT) {
+  if (PRINTSCREEN || RPH  || P6 || DEVTYPE || I2C || QUAT) {
     withGyro.getRollPitchHeadingQuat();  
     noGyro.getRollPitchHeadingQuat();               
     printResults();
@@ -189,22 +189,21 @@ void printResults() {
     Serial.println();
  }
 
- // comparison of gyro fusion and no gyro, format for realtimeplotter
- if (RPH2) {
-    //Serial.print("RPH2 ");
+ // comparison of gyro fusion and no gyro, format for plotIMU.py
+ if (P6) {
+    Serial.print("tt,PP,");
     Serial.print((int)noGyro.roll);
-    Serial.print(" ");
+    Serial.print(",");
     Serial.print((int)withGyro.roll);
-    Serial.print(" ");
+    Serial.print(",");
     Serial.print((int)noGyro.pitch);
-    Serial.print(" "); 
+    Serial.print(","); 
     Serial.print((int)withGyro.pitch);
-    Serial.print(" ");
+    Serial.print(",");
     Serial.print((int)noGyro.head);
-    Serial.print(" ");
+    Serial.print(",");
     Serial.print((int)withGyro.head);
-    //Serial.print(" ");   
-    Serial.print("\r"); 
+    Serial.print(",");   
     Serial.println();
   }
 

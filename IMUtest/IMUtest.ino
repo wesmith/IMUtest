@@ -166,7 +166,7 @@ void printResults() {
 
  // display of roll, pitch, heading formatted for displayIMU.py
  if (RPH) {
-    Serial.print("RPH "); 
+    Serial.print("tt,RPH,"); 
     Serial.print((int)withGyro.roll);
     Serial.print(",");
     Serial.print((int)withGyro.pitch);
@@ -177,7 +177,7 @@ void printResults() {
   }
 
  if (QUAT) {
-    Serial.print("QUAT");
+    Serial.print("tt,QUAT,");
     Serial.print(withGyro.q0);
     Serial.print(",");
     Serial.print(withGyro.q1);

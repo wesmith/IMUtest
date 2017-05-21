@@ -40,7 +40,9 @@ Each plot's title indicates the value of *alphaACC* and *alphaMAG* for the three
 
 **alphaACC = 1.00, alphaMAG = 0.80** For completeness, an extreme case showing pure gyro drift, with no input at all from the accelerometer. This is shown [here](../master/python/results/170521-122846-plotIMU-results.pdf).The roll, pitch, and heading angles derived from just the gyro and the magnetometer are at significant variance with what is produced using the raw accelerometer and the raw magnetometer data. The gyro drift is excessive, particularly for the heading angle. 
 
+A link to all of the results is [here](../master/python/results/).
 
+*******
 
 **_5/19/17 UPDATE_**
 

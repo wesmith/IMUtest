@@ -34,7 +34,10 @@ Each plot consists of three subplots: one each for roll, pitch, and heading, all
 
 Each plot's title indicates the value of *alphaACC* and *alphaMAG* for the three subplots on that page, as well as the sample rate represented by the plot. A plot sample rate of 30 samples/sec was typical. A few experiments will now be discussed in detail. 
 
-**alphaACC = 0.95, alphaMAG = 0.80** This is perhaps closest to an optimum weighting combination of all those tried to date. The plot is [here]
+**alphaACC = 0.95, alphaMAG = 0.80** This is perhaps closest to an optimum weighting combination of all those tried to date. The plot is [here1] (https://github.com/wesmith/IMUtest/blob/master/python/results/170521-132428-plotIMU-results.pdf). 
+
+[here2](../blob/master/python/results/170521-132428-plotIMU-results.pdf)
+
 
 
 **_5/19/17 UPDATE_**

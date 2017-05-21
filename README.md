@@ -34,9 +34,7 @@ Each plot consists of three subplots: one each for roll, pitch, and heading, all
 
 Each plot's title indicates the value of *alphaACC* and *alphaMAG* for the three subplots on that page, as well as the sample rate represented by the plot. A plot sample rate of 30 samples/sec was typical. A few experiments will now be discussed in detail. 
 
-**alphaACC = 0.95, alphaMAG = 0.80** This is perhaps closest to an optimum weighting combination of all those tried to date. The plot is [here1] (https://github.com/wesmith/IMUtest/blob/master/python/results/170521-132428-plotIMU-results.pdf). 
-
-[here2](../master/python/results/170521-132428-plotIMU-results.pdf)
+**alphaACC = 0.95, alphaMAG = 0.80** This is perhaps closest to an optimum weighting combination of all those tried so far today. The plot is [here](../master/python/results/170521-132428-plotIMU-results.pdf). It is evident that the gyro/accelerometer fusion is effectively smoothing the roll and pitch values. The roll and pitch values are derived independently of the magnetometer in this straightforward complementary approach: their calculation just requires the accelerometer vector and definition of the IMU platform coordinate axes. The heading value requires both the accelerometer and the magnetometer inputs, so the additional low-pass smoothing of the magnetometer is important in achieving a smoothed heading estimate. An example below shows the result of accelerometer/gyro fusion without magnetometer filtering, to clarify this point. 
 
 
 

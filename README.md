@@ -4,7 +4,14 @@ The purpose of this project is to develop a simple utility class to run on Ardui
 pitch, and heading information from a combination of magnetometer/accelerometer and gyro data. A straightforward
 complementary-fusion algorithm to combine the accelerometer and gyro data is implemented.
 
-### 5/19/17 UPDATE
+**_5/21/17 UPDATE_**
+
+A python program plotIMU.py has been developed to plot the roll, pitch, and heading angles from the IMU
+as it is randomly moved in three-space, to analyze the effect of the gyro/accelerometer fusion and magnetnetometer
+low-pass filtering. A series of plots have been produced to link to these results below. The two parameters that were
+varied from one plot to the other were the *alphaACC* and the *alphaMAG*. 
+
+**_5/19/17 UPDATE_**
 
 #### Added quaternion output.
 
@@ -31,7 +38,7 @@ real-time orientation of the chip in a fixed North, West, Up local frame, and th
 the local frame in the fixed chip X, Y, Z frame. 
 
 
-### END of 5/19/17 update
+**_END of 5/19/17 update_**
 
 
 The IMU class includes the following public methods:

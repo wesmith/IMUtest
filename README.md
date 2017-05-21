@@ -11,11 +11,15 @@ as it is randomly moved in three-space, to analyze the effect of the gyro/accele
 low-pass filtering. A series of plots have been produced to link to a discussion of these results below. The two 
 parameters that were varied from one plot to the other were the *alphaACC* and the *alphaMAG*. 
 
-*_alphaACC_* This is a float between 0 and 1, that is defined in IMUtest.ino. _alphaACC_ ~ 1 weights the gyro very
-heavily in the complementary filter, and _alphaACC_ ~ 0 weights the accelerometer very heavily. Typically values
-around 0.95 appear to be optimum: values lower than this produce noisy results, values closer to 1 tend to drift. 
+**alphaACC**  This is a float between 0 and 1, whose value is defined in IMUtest.ino. _alphaACC_ ~ 1 weights the gyro very
+heavily in the accelerometer/gyroscope complementary filter, and _alphaACC_ ~ 0 weights the accelerometer very heavily. Values
+around 0.95 appear to be optimum: values lower than this produce noisy roll, pitch, and heading results, and values closer to 1 
+produce values of roll, pitch, and heading that tend to drift over time due to gyroscope drift. 
 
-
+**alphaMAG**  As with *alphaACC*, this is a float between 0 and 1, whose value is again defined in IMUtest.ino. Unlike the 
+complementary filter parameter *alphaACC*, *alphaMAG* is a weighting factor for a simple low-pass magnetometer filter, since
+there is no corresponding 'magnetic gyroscope' to use in smoothing the magnetometer data. _alphaMAG_ ~ 1 is a very strong
+smoothing filter, and _alphaMAG_ ~ 0 is a very weak filter. 
 
 **_5/19/17 UPDATE_**
 

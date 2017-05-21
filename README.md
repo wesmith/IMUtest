@@ -6,6 +6,8 @@ complementary-fusion algorithm to combine the accelerometer and gyro data is imp
 
 **_5/21/17 UPDATE_**
 
+#### Plotting IMU performance
+
 A python program plotIMU.py has been developed to plot the roll, pitch, and heading angles from the IMU
 as it is randomly moved in three-space, to analyze the effect of the gyro/accelerometer fusion and magnetnetometer
 low-pass filtering. A series of plots have been produced to link to a discussion of these results below. The two 
@@ -20,6 +22,13 @@ produce values of roll, pitch, and heading that tend to drift over time due to g
 complementary filter parameter *alphaACC*, *alphaMAG* is a weighting factor for a simple low-pass magnetometer filter, since
 there is no corresponding 'magnetic gyroscope' to use in smoothing the magnetometer data. _alphaMAG_ ~ 1 is a very strong
 smoothing filter, and _alphaMAG_ ~ 0 is a very weak filter. 
+
+**ANALYSIS** A series of experiments were performed to examine the effects of *alphaACC* and *alphaMAG* on roll, pitch, and heading
+values. Each experiment lasted about 12 to 14 seconds, where the Pololu IMU (link at bottom) was manipulated by hand in a random, 
+quasi-periodic fashion in roll, pitch, and heading. The goal here was to explore the effects of the two weighting parameters on the
+smoothness of the roll, pitch, and heading output, and not to try to determine absolute accuracy of the IMU in three dimensions. To
+determine such accuracy would require some kind of orientation-truth device (either a calibrated mechanical support system or an
+optical 3D motion-mensuration system) which is not within the scope of this current effort. 
 
 **_5/19/17 UPDATE_**
 

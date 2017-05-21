@@ -20,13 +20,23 @@ int16_t data[12];      // I2C data registers 0x00 to 0x0b
 int  msecPerCycle = 20; // 50 Hz
 long baud = 57600; //9600; //115200; // typically 9600, 57600, 115200
 
+// weighting factor for accelerometer/gyro fusion
+// 0 < alphaACC < 1
+// alphaACC ~ 1 weights gyro heavily, alphaACC ~ 0 weights accelerometer heavily
+float alphaACC = 0.95; 
+
+// weighting factor for a simple low-pass magnetometer filter
+// 0 < alphaMAG < 1
+// alphaMAG ~ 1 is a very strong filter, alphaMAG ~ 0 is a very weak filter
+float alphaMAG    = 0.50;
+
 // generally have only one of the following set to TRUE, depending upon task
 bool I2C          = false;   // run in I2C slave mode
 bool PRINTSCREEN  = false;  // compare gyro fusion 'on' to gyro fusion 'off', 
                             // user-friendly print of roll, pitch, heading
 bool RPH          = false;   // roll, pitch, heading, formatted for displayIMU.py
 bool QUAT         = false;   // quaternion formatted for displayIMU.py
-bool P6           = true;   // compare gyro fusion 'on' to gyro fusion 'off',
+bool PP           = true;   // compare gyro fusion 'on' to gyro fusion 'off',
                             // for plotIMU.py
 bool CALIBACC     = false;  // generate accelerometer calibration data
 bool CALIBMAG     = false;  // generate magnetometer  calibration data
@@ -57,11 +67,10 @@ void setup() {
   delay(100);
   
   // true means gyro is used, followed by alpha 
-  // 0 < alpha < 1; 
-  // alpha ~ 1 weights gyro heavily, alpha ~ 0 weights accelerometer heavily
   // if false, alpha is ignored, and no gyro data is used
-  withGyro.setWeightsAndGyro(true, 0.95, 0.5); // accelerometer alpha, magnetometer alpha
-  noGyro.setWeightsAndGyro(false, 0.0, 0.0); // no gyro, accelerometer alpha is ignored
+  // alphaMAG filter weighting is independent of whether gyro is used or not
+  withGyro.setWeightsAndGyro(true, alphaACC, alphaMAG); // acc/gyro fusion, filtered magnetometer
+  noGyro.setWeightsAndGyro(false, 0.0, 0.0); // raw accelerometer and raw magnetometer are used
   
   // mag, acc, calibration methods take three offsets, three scales
   // 5/11/17 calibration, average of three 
@@ -77,19 +86,19 @@ void setup() {
 
   // NOTE: the rollAxis, rollReference vectors must be orthogonal for meaningful 
   // results; they can be non-normal: they are normalized internally
-  // WS 5/3/17: 'normal' chip settings, consistent with Pololu markings
+  // 5/3/17 note: 'normal' chip settings, consistent with Pololu markings
   // x chip axis is 'x', y chip axis is 'y'
   // x axis is rollAxis, y axis is rollReference
-  withGyro.setIMUAxes  (1, 0, 0, 0, 1, 0); 
+  withGyro.setIMUAxes(1, 0, 0, 0, 1, 0); 
   noGyro.setIMUAxes  (1, 0, 0, 0, 1, 0); 
 
   // 5/4/17 experiment: this worked, with correct signs for angles
   // -y chip axis is rollAxis 'x', x chip axis is rollReference 'y'
-  //withGyro.setIMUAxes      (0, -1, 0, 1, 0, 0); 
+  //withGyro.setIMUAxes(0, -1, 0, 1, 0, 0); 
 
   // 5/4/17 experiment: this worked, with correct signs for angles
   // z chip axis is rollAxis 'x', x chip axis is rollReference 'y'
-  //withGyro.setIMUAxes      (0, 0, 1, 1, 0, 0);
+  //withGyro.setIMUAxes(0, 0, 1, 1, 0, 0);
 }
 
 
@@ -99,7 +108,7 @@ void loop() {
   if (CALIBACC) {withGyro.doCalibrateAcc(CALIB_TEST);}
   if (CALIBMAG) {withGyro.doCalibrateMag(CALIB_TEST);}
  
-  if (PRINTSCREEN || RPH  || P6 || DEVTYPE || I2C || QUAT) {
+  if (PRINTSCREEN || RPH  || PP || DEVTYPE || I2C || QUAT) {
     withGyro.getRollPitchHeadingQuat();  
     noGyro.getRollPitchHeadingQuat();               
     printResults();
@@ -190,8 +199,12 @@ void printResults() {
  }
 
  // comparison of gyro fusion and no gyro, format for plotIMU.py
- if (P6) {
-    Serial.print("tt,PP,");
+ if (PP) {
+    Serial.print("PP,");
+    Serial.print(alphaACC);  // communicate for plot title
+    Serial.print(",");
+    Serial.print(alphaMAG);  // communicate for plot title
+    Serial.print(",");
     Serial.print((int)noGyro.roll);
     Serial.print(",");
     Serial.print((int)withGyro.roll);

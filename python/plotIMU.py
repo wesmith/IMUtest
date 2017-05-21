@@ -18,11 +18,9 @@ import serial
 
 
 # indicator for text stream: use in IMUtest.ino Serial.print statements
-mark = "tt"
+mark = "PP"
 
-# mode text format defined in IMUtest.ino;
-allModes = {'P3':np.zeros( 3 ),
-                 'P6':np.zeros( 6 )}
+num = 8 # number of items to parse in data stream
 
 nr = 3  # number of rows in subplots
 nc = 1  # number of cols in subplots
@@ -32,39 +30,31 @@ def parseLine( line ):
 
     if line.find( mark ) != 1: # check for lines starting with text leader
 
-        #print "1", line
         line = line.replace( mark, "" )   # delete text leader
-        #print "2", line
 
-        words = string.split(line,",") # words will have \r\n at end, compare to n-1
-        #print "3", words
+        words = string.split(line,",") 
         words = words[:-1] # remove \r\n at the end
-        #print "4", words
+        words = words[1:]  # strip off leading null
 
-        #txt = words[1] # get data mode
-
-        #num = len( allModes[txt] )
-        num = 6
-
-        words = words[2:] # strip off mode
-
-        vals = np.zeros( num ) # initialize, in case next test not passed
-
+        vals = np.zeros( num ) # initialize, in case 'try' fails in early stream
+        
         if len(words) == num: 
-            try:
+            try:  # early stream from IMUtest.ino while booting can be corrupted 
                 vals = np.array([ float(k) for k in words ])
             except:
                 print "Invalid line"
                 print words
        
     return vals
+    
 
-
-def plotIMU( port, baudrate=115200, N=1000):
+def plotIMU( port, baudrate=115200, N=1000, savDir=None):
 
     ser = serial.Serial( port=port, baudrate=baudrate, timeout=1)
 
-    vals = np.zeros([N,6])
+    vals = np.zeros([N,num])
+    tt   = np.zeros(N)  # time axis
+    t1   = time.time() # initialize time
 
     for k in range(N):
 
@@ -76,44 +66,60 @@ def plotIMU( port, baudrate=115200, N=1000):
             sys.exit('LOST SERIAL CONNECTION')
 
         vals[k,:] = parseLine( line )
-        print k, vals[k,:]
+        tt[k]     = time.time() - t1
+        print k  # observe sample progress while moving IMU
+        
 
     ser.close()
 
-    
+    freq = N/tt[-1]  # samples per second for the plot
+
     fig = py.figure( figsize = (12,8) )
 
-    label = 'NO GYRO, WITH GYRO'
+    legendLabel = ['NO GYRO','WITH GYRO',
+                   'NO GYRO','WITH GYRO',
+                   'NO GYRO or MAG SMOOTHING','WITH GYRO and MAG SMOOTHING']
+    yLabel = ['ROLL (DEG)', 'PITCH (DEG)', 'MAG HEADING (DEG)']
+    colors = ['r','k']
 
-    ax = fig.add_subplot( nr, nc, 1 )
-    ax.plot( vals[:,0], label='NO GYRO' )
-    ax.plot( vals[:,1], label='WITH GYRO' )
-    ax.legend( loc=4, prop={'size':10})
-    py.grid()
-    
-    ax = fig.add_subplot( nr, nc, 2 )
-    ax.plot( vals[:,2], label='NO GYRO' )
-    ax.plot( vals[:,3], label='WITH GYRO' )
-    ax.legend( loc=4, prop={'size':10})
-    py.grid()
-    
-    ax = fig.add_subplot( nr, nc, 3 )
-    ax.plot( vals[:,4], label='NO GYRO or MAG SMOOTHING' )
-    ax.plot( vals[:,5], label='WITH GYRO and MAG SMOOTHING' )
-    ax.legend( loc=4, prop={'size':10})
-    py.grid()
+    for k in range(3):
+        ax = fig.add_subplot( nr, nc, k+1 )
+        ax.plot( tt, vals[:,2*k+2], '%s-' % colors[2*k     % len(colors)],
+                 label=legendLabel[2*k  ] )
+        ax.plot( tt, vals[:,2*k+3], '%s-' % colors[(2*k+1) % len(colors)],
+                 label=legendLabel[2*k+1] )
+        ax.legend( loc=2, prop={'size':10})
+        ax.set_xlim( tt[0], tt[-1] )
+        ax.set_ylabel(yLabel[k])
+        ax.grid()
 
-    py.show()
+    tim = time.strftime('%y%m%d-%H%M%S')
+    fnam = '%s-plotIMU-results' % tim
+    
+    txt = '%s\nROLL, PITCH, MAG HEADING vs TIME'  % fnam
+    txt += '\nalphaACC: %g  alphaMAG: %g' % (vals[-1,0], vals[-1,1])
+    txt += '   SAMPLE RATE: %g SAMP/SEC' % freq
+    py.suptitle(txt)
+    py.xlabel('TIME (sec)')
+
+    if savDir:
+        fnam = os.path.join( savDir, ('%s.png' % fnam) )
+        print 'Saving file %s' % fnam
+        py.savefig( fnam )
+        py.close()
+    else:
+        py.show()
     
 
 if __name__ == '__main__':
 
+    savDir = './results' # save image file here; set to None for screen plot
+
     port = '/dev/tty.usbmodemfd1341'  # Arduino serial port: the user must specify 
 
-    # 57600, 115200 works; 9600 too slow
     # NOTE: the same baudrate must be defined in IMUtest.ino
     baudrate = 57600 #9600 #115200
 
-    N = 300  # the number of time samples to plot
+    N = 1000  # the number of time samples to plot
     
-    plotIMU( port, baudrate=baudrate, N=N )
+    plotIMU( port, baudrate=baudrate, N=N, savDir=savDir )

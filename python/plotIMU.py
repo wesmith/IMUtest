@@ -26,6 +26,7 @@ nr = 3  # number of rows in subplots
 nc = 1  # number of cols in subplots
 
 
+
 def parseLine( line ):
 
     if line.find( mark ) != 1: # check for lines starting with text leader
@@ -54,7 +55,7 @@ def plotIMU( port, baudrate=115200, N=1000, savDir=None):
 
     vals = np.zeros([N,num])
     tt   = np.zeros(N)  # time axis
-    t1   = time.time() # initialize time
+    #t1   = time.time() # initialize time
 
     for k in range(N):
 
@@ -66,13 +67,15 @@ def plotIMU( port, baudrate=115200, N=1000, savDir=None):
             sys.exit('LOST SERIAL CONNECTION')
 
         vals[k,:] = parseLine( line )
-        tt[k]     = time.time() - t1
+        tt[k]     = time.time() # - t1
         print k  # observe sample progress while moving IMU
         
 
     ser.close()
 
-    freq = N/tt[-1]  # samples per second for the plot
+    tt -= tt[nIgnore]  # subtract start time from all times
+
+    freq = (N - nIgnore)/tt[-1]  # samples per second for the plot
 
     fig = py.figure( figsize = (12,8) )
 
@@ -81,15 +84,17 @@ def plotIMU( port, baudrate=115200, N=1000, savDir=None):
                    'NO GYRO or MAG SMOOTHING','WITH GYRO and MAG SMOOTHING']
     yLabel = ['ROLL (DEG)', 'PITCH (DEG)', 'MAG HEADING (DEG)']
     colors = ['r','k']
-
+    
     for k in range(3):
         ax = fig.add_subplot( nr, nc, k+1 )
-        ax.plot( tt, vals[:,2*k+2], '%s-' % colors[2*k     % len(colors)],
+        ax.plot( tt[nIgnore:], vals[nIgnore:,2*k+2],
+                 '%s-' % colors[2*k     % len(colors)],
                  label=legendLabel[2*k  ] )
-        ax.plot( tt, vals[:,2*k+3], '%s-' % colors[(2*k+1) % len(colors)],
+        ax.plot( tt[nIgnore:], vals[nIgnore:,2*k+3],
+                 '%s-' % colors[(2*k+1) % len(colors)],
                  label=legendLabel[2*k+1] )
         ax.legend( loc=2, prop={'size':10})
-        ax.set_xlim( tt[0], tt[-1] )
+        ax.set_xlim( tt[nIgnore], tt[-1] )
         ax.set_ylabel(yLabel[k])
         ax.grid()
 
@@ -97,15 +102,15 @@ def plotIMU( port, baudrate=115200, N=1000, savDir=None):
     fnam = '%s-plotIMU-results' % tim
     
     txt = '%s\nROLL, PITCH, MAG HEADING vs TIME'  % fnam
-    txt += '\nalphaACC: %g  alphaMAG: %g' % (vals[-1,0], vals[-1,1])
-    txt += '   SAMPLE RATE: %g SAMP/SEC' % freq
+    txt += '\nalphaACC: %.2f  alphaMAG: %.2f' % (vals[-1,0], vals[-1,1])
+    txt += '   SAMPLE RATE: %.2f SAMP/SEC' % freq
     py.suptitle(txt)
     py.xlabel('TIME (sec)')
 
     if savDir:
-        fnam = os.path.join( savDir, ('%s.png' % fnam) )
+        fnam = os.path.join( savDir, ('%s.pdf' % fnam) )
         print 'Saving file %s' % fnam
-        py.savefig( fnam )
+        py.savefig( fnam, bbox_inches='tight' )
         py.close()
     else:
         py.show()
@@ -120,6 +125,12 @@ if __name__ == '__main__':
     # NOTE: the same baudrate must be defined in IMUtest.ino
     baudrate = 57600 #9600 #115200
 
-    N = 1000  # the number of time samples to plot
+    nIgnore = 100 # number of samples to ignore as Arduino is restarting
+              # (Arduino is reset when this program is run)
+
+    N = 500  # the number of time samples to plot
+    
+    if (N < 2 * nIgnore):
+        sys.exit('N must be larger than %d' % (2 * nIgnore))
     
     plotIMU( port, baudrate=baudrate, N=N, savDir=savDir )

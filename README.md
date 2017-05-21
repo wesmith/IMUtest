@@ -36,7 +36,7 @@ Each plot's title indicates the value of *alphaACC* and *alphaMAG* for the three
 
 **alphaACC = 0.95, alphaMAG = 0.80** This is perhaps closest to an optimum weighting combination of all those tried to date. The plot is [here1] (https://github.com/wesmith/IMUtest/blob/master/python/results/170521-132428-plotIMU-results.pdf). 
 
-[here2](../blob/master/python/results/170521-132428-plotIMU-results.pdf)
+[here2](../master/python/results/170521-132428-plotIMU-results.pdf)
 
 
 

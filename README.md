@@ -8,8 +8,14 @@ complementary-fusion algorithm to combine the accelerometer and gyro data is imp
 
 A python program plotIMU.py has been developed to plot the roll, pitch, and heading angles from the IMU
 as it is randomly moved in three-space, to analyze the effect of the gyro/accelerometer fusion and magnetnetometer
-low-pass filtering. A series of plots have been produced to link to these results below. The two parameters that were
-varied from one plot to the other were the *alphaACC* and the *alphaMAG*. 
+low-pass filtering. A series of plots have been produced to link to a discussion of these results below. The two 
+parameters that were varied from one plot to the other were the *alphaACC* and the *alphaMAG*. 
+
+*_alphaACC_* This is a float between 0 and 1, that is defined in IMUtest.ino. _alphaACC_ ~ 1 weights the gyro very
+heavily in the complementary filter, and _alphaACC_ ~ 0 weights the accelerometer very heavily. Typically values
+around 0.95 appear to be optimum: values lower than this produce noisy results, values closer to 1 tend to drift. 
+
+
 
 **_5/19/17 UPDATE_**
 

@@ -25,7 +25,7 @@ num = 8 # number of items to parse in data stream
 nr = 3  # number of rows in subplots
 nc = 1  # number of cols in subplots
 
-
+blurb = 'Copyright (c) 2017 Warren E Smith  https://github.com/wesmith/IMUtest'
 
 def parseLine( line ):
 
@@ -97,6 +97,12 @@ def plotIMU( port, baudrate=115200, N=1000, savDir=None):
         ax.set_xlim( tt[nIgnore], tt[-1] )
         ax.set_ylabel(yLabel[k])
         ax.grid()
+        if (k == 2):
+            ax.text(0.99, 0.01, blurb,
+                    horizontalalignment='right', verticalalignment='bottom',
+                    transform=ax.transAxes, fontsize=8,
+                    #bbox=dict(facecolor='red', alpha=0.5)
+            )
 
     tim = time.strftime('%y%m%d-%H%M%S')
     fnam = '%s-plotIMU-results' % tim

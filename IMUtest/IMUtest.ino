@@ -28,7 +28,7 @@ float alphaACC = 0.95;
 // weighting factor for a simple low-pass magnetometer filter
 // 0 < alphaMAG < 1
 // alphaMAG ~ 1 is a very strong filter, alphaMAG ~ 0 is a very weak filter
-float alphaMAG    = 0.90;
+float alphaMAG    = 0.80;
 
 // generally have only one of the following set to TRUE, depending upon task
 bool I2C          = false;   // run in I2C slave mode

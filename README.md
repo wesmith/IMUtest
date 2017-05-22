@@ -1,8 +1,8 @@
 # IMUTest
 
-The purpose of this project is to develop a simple utility class to run on Arduino processors to generate roll,
-pitch, and heading information from a combination of magnetometer/accelerometer and gyro data. A straightforward
-complementary-fusion algorithm to combine the accelerometer and gyro data is implemented.
+The purpose of this project is to develop a simple utility class, called IMU, to run on Arduino processors to generate roll, pitch, and heading information from a combination of magnetometer/accelerometer and gyro data. A straightforward complementary-fusion algorithm to combine the accelerometer and gyro data is implemented in IMU, as well as magnetometer and accelerometer calibration aids. An example Arduino program, IMUtest.ino, demonstrates the use of the IMU class, including various ways in which the IMU output can be displayed in real time and plotted. The associated python display/plotting programs are also included. The IMU class utilizes the Pololu LSM303 and L3G classes (links at the bottom).  
+
+*******
 
 **_5/21/17 UPDATE_**
 

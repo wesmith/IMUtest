@@ -34,9 +34,9 @@ float alphaMAG    = 0.80;
 bool I2C          = false;   // run in I2C slave mode
 bool PRINTSCREEN  = false;  // compare gyro fusion 'on' to gyro fusion 'off', 
                             // user-friendly print of roll, pitch, heading
-bool RPH          = false;   // roll, pitch, heading, formatted for displayIMU.py
+bool RPH          = true;   // roll, pitch, heading, formatted for displayIMU.py
 bool QUAT         = false;   // quaternion formatted for displayIMU.py
-bool PP           = true;   // compare gyro fusion 'on' to gyro fusion 'off',
+bool PP           = false;   // compare gyro fusion 'on' to gyro fusion 'off',
                             // for plotIMU.py
 bool CALIBACC     = false;  // generate accelerometer calibration data
 bool CALIBMAG     = false;  // generate magnetometer  calibration data
@@ -228,4 +228,3 @@ void printResults() {
    Serial.println();
  }
 }
-

@@ -27,3 +27,14 @@
 *.exe
 *.out
 *.app
+
+**/.ipynb_checkpoints
+*~
+*.pyc
+*.wav
+*.html
+#don't ignore index.html
+!index.html
+*.pdf
+*.ps
+*.odg#
